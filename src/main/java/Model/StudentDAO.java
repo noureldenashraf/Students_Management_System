@@ -7,9 +7,7 @@ import java.util.Scanner;
 public class StudentDAO extends DbConnection {
     private static final Scanner sc = new Scanner(System.in);
 
-    public static void getStudentById() {
-        System.out.println("ENTER ID");
-        int id = sc.nextInt();
+    public static void getStudentById(int id) {
         Student student = null;
         String query = "SELECT * FROM students WHERE id = ?";
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -18,13 +16,13 @@ public class StudentDAO extends DbConnection {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
+            while (rs.next()) {
                 student = new Student(
                         rs.getInt("id"),
                         rs.getString("fname"),
                         rs.getString("lname"),
                         rs.getInt("age"),
-                        rs.getString("gpa")
+                        rs.getDouble("gpa")
                 );
                 System.out.println(student.id);
                 System.out.println(student.fname);
@@ -32,7 +30,7 @@ public class StudentDAO extends DbConnection {
                 System.out.println(student.gpa);
             }
         } catch (SQLException ex) {
-            throw new RuntimeException(ex);
+            throw new RuntimeException("COULDN'T FIND STUDENT WITH THIS ID");
         }
     }
 
@@ -50,25 +48,56 @@ public class StudentDAO extends DbConnection {
                 "values (?,?,?,?)";
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1,fname);
-            stmt.setString(2,lname);
-            stmt.setInt(3,age);
-            stmt.setDouble(4,gpa);
+            stmt.setString(1, fname);
+            stmt.setString(2, lname);
+            stmt.setInt(3, age);
+            stmt.setDouble(4, gpa);
             ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
+            while (rs.next()) {
                 student = new Student(
                         rs.getInt("id"),
                         rs.getString("fname"),
                         rs.getString("lname"),
                         rs.getInt("age"),
-                        rs.getString("gpa")
+                        rs.getDouble("gpa")
                 );
+                getStudentById(rs.getInt("id")); // fix later
             }
         } catch (SQLException ex) {
-            throw new RuntimeException(ex);
+            throw new RuntimeException("ERROR WHILE ADDING NEW STUDENT");
         }
+    }
 
+    public static void viewAllStudents() {
+        Student student = null;
+        ArrayList<Student> list = new ArrayList<>();
+        String query = "SELECT * FROM students";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                list.add(new Student(
+                        rs.getInt("id"),
+                        rs.getString("fname"),
+                        rs.getString("lname"),
+                        rs.getInt("age"),
+                        rs.getDouble("gpa")
+                        )
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println("ID : "+list.get(i).id);
+            System.out.println("FIRST NAME : "+list.get(i).fname);
+            System.out.println("LAST NAME : " + list.get(i).lname);
+            System.out.println("AGE : "+list.get(i).age);
+            System.out.println("GPA : "+list.get(i).gpa);
+            System.out.println("------------------------------------------");
+        }
     }
 }
 

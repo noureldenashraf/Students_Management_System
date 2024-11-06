@@ -15,13 +15,17 @@ public class Main {
         int sw = sc.nextInt();
         switch (sw){
             case 1:{
-            StudentDAO.addStudent();
+                StudentDAO.addStudent();
              break;
             }
-
-            case 2:
+            case 2:{
+                StudentDAO.viewAllStudents();
+                break;
+            }
             case 3:{
-                StudentDAO.getStudentById();
+                System.out.println("ENTER ID");
+                int id = sc.nextInt();
+                StudentDAO.getStudentById(id);
                 break;
             }
         }
